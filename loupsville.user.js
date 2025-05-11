@@ -145,68 +145,92 @@ $('.lv-modal-checkbox.chat-stats').on('click', () => {
   $('.lv-modal-checkbox.player-aura').text(LV_SETTINGS.PLAYER_AURA ? '' : '')
   $('.lv-modal-checkbox.player-aura').text(LV_SETTINGS.PLAYER_NOTES ? '' : '')
 
+  $('.lv-modal-perk-refresh-aura').on('click', () => {
+    updateAllPlayerAura()
+  })
+
   handleAutoReplay()
 }
 
 function updateAllPlayerAura() {
-  // Loop through all players and update the dropdown values
   PLAYERS.forEach((player) => {
-    const dropdown = $(`select.player-status-dropdown`).eq(PLAYERS.indexOf(player));
+    const playerLabel = `${parseInt(player.gridIdx) + 1} ${player.username}`;
+    const el = $(`div:contains("${playerLabel}")`);
 
-    if (PLAYERAURAMAP.has(username)) {
-      const status = PLAYERAURAMAP.get(username);
-      dropdown.val(status); 
-    }else{
-      dropdown.val('none');
+    if (el.length) {
+      const grandparent = $(el[el.length - 1].parentElement.parentElement);
+      const dropdown = grandparent.find('select.player-status-dropdown');
+
+      const username = player.username;
+      if (PLAYERAURAMAP.has(username)) {
+        const status = PLAYERAURAMAP.get(username);
+        dropdown.val(status);
+      } else {
+        dropdown.val('none');
+      }
     }
   });
 }
 
+
+const addPlayerAura = () => {
+    PLAYERS.forEach((player) => {
+        console.log(player.username)
+        const str = `${parseInt(player.gridIdx) + 1} ${player.username}`
+        const el = $(`div:contains("${str}")`)
+        const username = player.username
+        if (el.length && username) {
+        const dropdown = $('<select></select>')
+        .addClass('player-status-dropdown')
+        .css({
+            width: '40px',
+            height: '20px',
+            padding: '0px',
+            marginLeft: '4px',
+            marginRight: '4px',
+            border: 'none',
+            appearance: 'none',
+            zIndex: '10000',
+        });
+
+            const options = ['none', 'good', 'bad', 'unk'];
+        options.forEach(option => {
+        dropdown.append($('<option></option>').val(option).text(option.charAt(0).toUpperCase() + option.slice(1)));
+        });
+
+            dropdown.on('click mousedown focus', function (e) {
+        e.stopPropagation();
+        });
+
+
+
+        const grandparent = $(el[el.length - 1].parentElement.parentElement.parentElement);
+        if (grandparent.find('select.player-status-dropdown').length === 0) {
+                $(el[el.length - 1].parentElement.parentElement.parentElement).append(dropdown);
+        }
+
+        dropdown.on('change', function () {
+            const selectedValue = dropdown.val();
+            PLAYERAURAMAP.set(username, selectedValue);
+            console.log(`Player: ${username}, Status: ${selectedValue}`);
+        });
+        }
+    })
+}
+
 const removePlayerAura = () => {
     // remove player aura
+     $('select.player-status-dropdown').remove();
 }
 
 const handlePlayerAura = () => {
-if (!LV_SETTINGS.SHOW_HIDDEN_LVL) return
-  PLAYERS.forEach((player) => {
-    const str = `${parseInt(player.gridIdx) + 1} ${player.username}`
-    const el = $(`div:contains("${str}")`)
-    const username = player.username
-    if (el.length && username) {
-      const dropdown = $('<select></select>')
-      .addClass('player-status-dropdown')
-      .css({
-        width: '40px',
-        height: '20px',
-        padding: '0px',
-        marginLeft: '4px',
-        marginRight: '4px',
-        border: 'none',
-        appearance: 'none',
-        zIndex: '10000',
-      });
-
-          const options = ['none', 'good', 'bad', 'unk'];
-    options.forEach(option => {
-      dropdown.append($('<option></option>').val(option).text(option.charAt(0).toUpperCase() + option.slice(1)));
-    });
-
-          dropdown.on('click mousedown focus', function (e) {
-      e.stopPropagation();
-    });
-
-      const grandparent = $(el[el.length - 1].parentElement.parentElement.parentElement);
-      if (grandparent.find('select.player-status-dropdown').length === 0) {
-            $(el[el.length - 1].parentElement.parentElement.parentElement).append(dropdown);
-      }
-
-    dropdown.on('change', function () {
-        const selectedValue = dropdown.val();
-        PLAYERAURAMAP.set(username, selectedValue);
-        console.log(`Player: ${username}, Status: ${selectedValue}`);
-    });
+    if(LV_SETTINGS.PLAYER_AURA){
+        addChatMsg(' 🍂 Adding player aura')
+        PLAYERAURAMAP.clear();
+        addPlayerAura()
+    }else{
+        removePlayerAura()
     }
-  })
 }
 
 const handleAutoReplay = () => {
@@ -807,7 +831,8 @@ const messagesToCatch = {
     DOCUMENT_TITLE = `⌛ ${ROLE.name}`
     PLAYERS = data.players
     setTimeout(setPlayersLevel, 1000)
-    setTimeout(handlePlayerAura, 1000)
+    setTimeout(handlePlayerAura, 20000)
+    
     setTimeout(() => {
       if (
         !SOCKET &&
@@ -1162,7 +1187,8 @@ const lvModalPerk = `
         <div class="lv-modal-subtitle">Perk settings</div>
         <div class="lv-modal-option">
           <div class="lv-modal-checkbox player-aura lv-icon"></div>
-          <span>Player Aura</span>
+          <span>Player Aura  </span>
+          <button class="lv-modal-perk-refresh-aura">Refresh Aura</button>
         </div>
         <div class="lv-modal-option">
           <div class="lv-modal-checkbox player-notes lv-icon"></div>

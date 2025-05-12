@@ -289,6 +289,16 @@ const addPlayerNotes = () => {
                     e.stopPropagation();
                 });
 
+                textInput.on('focus', function () {
+                    // Disable all textareas
+                    $('textarea').prop('disabled', true);
+                });
+
+                textInput.on('blur', function () {
+                    // Re-enable all textareas after focus is lost
+                    $('textarea').prop('disabled', false);
+                });
+
                 // console.log(`Added note for ${username}`);
                 textInput.on('input', function () {
                     const note = textInput.val();

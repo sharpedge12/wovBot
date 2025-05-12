@@ -169,6 +169,20 @@ $('.lv-modal-checkbox.chat-stats').on('click', () => {
     undoChatHiding();
   })
 
+  $('.lv-modal-perk-message-mention-input').on('focus', function () {
+      // Disable all textareas
+      $('textarea').prop('disabled', true);
+  });
+
+  $('.lv-modal-perk-message-mention-btn').on('click', () => {
+    const numToDel = parseInt($('.lv-modal-perk-message-mention-input').val())
+    console.log(numToDel)
+    playerChatHidingMention(numToDel);
+  })
+  $('.lv-modal-perk-message-mention-btn-undo').on('click', () => {
+    undoChatHidingMention();
+  })
+
 
   handleAutoReplay()
 }
@@ -394,6 +408,60 @@ const undoChatHiding = () => {
   }
 };
 
+const playerChatHidingMention = (givenNumber) => {
+  const el = $('div:contains("Day ")');
+  const lastEl = el.last()[0];
+  let lastClass = '';
+
+  if (lastEl && lastEl.className) {
+    const classList = lastEl.className.trim().split(/\s+/);
+    lastClass = classList[classList.length - 1];
+    console.log("Last class from Day element:", lastClass);
+  }
+
+  if (lastClass) {
+    $('span.' + lastClass).each(function () {
+      const parentDiv = $(this).closest('div');
+
+      const fullDivText = parentDiv.text();
+      const spanText = parentDiv.find('span.' + lastClass).text();
+
+      // Remove spanText from divText to get text outside span
+      const outsideSpanText = fullDivText.replace(spanText, '');
+
+      const numberPattern = new RegExp(`\\b${givenNumber}\\b`);
+
+      // If number is NOT in the outsideSpanText, hide it
+      if (!numberPattern.test(outsideSpanText)) {
+        console.log(`Hiding div — number ${givenNumber} not found outside span:`, parentDiv);
+        parentDiv.hide();
+      } else {
+        console.log(`Keeping div — number ${givenNumber} found outside span.`);
+      }
+    });
+  }
+};
+
+const undoChatHidingMention = () => {
+  const el = $('div:contains("Day ")');
+  const lastEl = el.last()[0];
+  let lastClass = '';
+
+  if (lastEl && lastEl.className) {
+    const classList = lastEl.className.trim().split(/\s+/);
+    lastClass = classList[classList.length - 1];
+    console.log("Last class from Day element:", lastClass);
+  }
+
+  if (lastClass) {
+    $('span.' + lastClass).each(function () {
+      const parentDiv = $(this).closest('div');
+      parentDiv.show();
+    });
+  }
+};
+
+
 
 const handleAutoReplay = () => {
   if (LV_SETTINGS.AUTO_REPLAY) {
@@ -409,6 +477,7 @@ const handleAutoReplay = () => {
     clearInterval(AUTO_REPLAY_INTERVAL)
   }
 }
+
 
 
 
@@ -1369,11 +1438,13 @@ const lvModalPerk = `
         <span class="">See all messages sent by : </span>
         <input type="text" class="lv-modal-perk-message-input">
         <button class="lv-modal-perk-message-btn">Do</button>
-          <button class="lv-modal-perk-message-btn-undo">Undo</button>
+        <button class="lv-modal-perk-message-btn-undo">Undo</button>
         </div>
         <div class="lv-modal-command">
-          <button class="lv-modal-gold-wheel-btn">Mentioned In</button>
           <span class="">See all messages when a player is mentioned</span>
+          <input type="text" class="lv-modal-perk-message-mention-input">
+          <button class="lv-modal-perk-message-mention-btn">Do</button>
+          <button class="lv-modal-perk-message-mention-btn-undo">Undo</button>
         </div>
       </div>
       <div class="lv-modal-footer">

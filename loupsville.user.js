@@ -42,6 +42,7 @@ var LV_SETTINGS = {
   PLAYER_AURA: false,
 }
 const PLAYERAURAMAP = new Map();
+const PLAYERNOTESMAP = new Map();
 var AUTO_REPLAY_INTERVAL = undefined
 var SOCKET = undefined
 var REGULARSOCKET = undefined
@@ -134,19 +135,24 @@ $('.lv-modal-checkbox.chat-stats').on('click', () => {
     $('.lv-modal-checkbox.player-aura').on('click', () => {
         LV_SETTINGS.PLAYER_AURA = !LV_SETTINGS.PLAYER_AURA
         $('.lv-modal-checkbox.player-aura').text(LV_SETTINGS.PLAYER_AURA ? '' : '')
+        handlePlayerAura()
         saveSetting()
     })
-    $('.lv-modal-checkbox.player-aura').on('click', () => {
+    $('.lv-modal-checkbox.player-notes').on('click', () => {
         LV_SETTINGS.PLAYER_NOTES = !LV_SETTINGS.PLAYER_NOTES
-        $('.lv-modal-checkbox.player-aura').text(LV_SETTINGS.PLAYER_NOTES ? '' : '')
+        $('.lv-modal-checkbox.player-notes').text(LV_SETTINGS.PLAYER_NOTES ? '' : '')
+        handlePlayerNotes()
         saveSetting()
     })
 
   $('.lv-modal-checkbox.player-aura').text(LV_SETTINGS.PLAYER_AURA ? '' : '')
-  $('.lv-modal-checkbox.player-aura').text(LV_SETTINGS.PLAYER_NOTES ? '' : '')
+  $('.lv-modal-checkbox.player-notes').text(LV_SETTINGS.PLAYER_NOTES ? '' : '')
 
   $('.lv-modal-perk-refresh-aura').on('click', () => {
     updateAllPlayerAura()
+  })
+  $('.lv-modal-perk-refresh-notes').on('click', () => {
+    updateAllPlayerNotes()
   })
 
   handleAutoReplay()
@@ -175,7 +181,7 @@ function updateAllPlayerAura() {
 
 const addPlayerAura = () => {
     PLAYERS.forEach((player) => {
-        console.log(player.username)
+        // console.log(player.username)
         const str = `${parseInt(player.gridIdx) + 1} ${player.username}`
         const el = $(`div:contains("${str}")`)
         const username = player.username
@@ -212,7 +218,6 @@ const addPlayerAura = () => {
         dropdown.on('change', function () {
             const selectedValue = dropdown.val();
             PLAYERAURAMAP.set(username, selectedValue);
-            console.log(`Player: ${username}, Status: ${selectedValue}`);
         });
         }
     })
@@ -233,6 +238,85 @@ const handlePlayerAura = () => {
     }
 }
 
+// Function to update text inputs with values from PLAYERNOTESMAP
+const updatePlayerNotes = () => {
+    PLAYERS.forEach((player) => {
+        const username = player.username;
+        const str = `${parseInt(player.gridIdx) + 1} ${username}`;
+        const el = $(`div:contains("${str}")`);
+
+        if (el.length && username) {
+            const grandparent = $(el[el.length - 1].parentElement.parentElement.parentElement);
+            const textInput = grandparent.find('input.player-status-note');
+
+            // Check if the text input exists and update its value from the map
+            if (textInput.length > 0 && PLAYERNOTESMAP.has(username)) {
+                const note = PLAYERNOTESMAP.get(username);
+                textInput.val(note);
+                console.log(`Updated note for ${username}: ${note}`);
+            }
+        }
+    });
+};
+
+const addPlayerNotes = () => {
+    PLAYERS.forEach((player) => {
+        const str = `${parseInt(player.gridIdx) + 1} ${player.username}`
+        const el = $(`div:contains("${str}")`)
+        const username = player.username
+        if (el.length && username) {
+            const grandparent = $(el[el.length - 1].parentElement.parentElement.parentElement);
+
+            // Only add if not already present
+            if (grandparent.find('input.player-status-note').length === 0) {
+                // Create the text input
+                const textInput = $('<input type="text" />')
+                    .addClass('player-status-note')
+                    .css({
+                        display: 'block',
+                        width: '40px',
+                        height: '20px',
+                        fontSize: '14px',
+                        marginBottom: '2px',
+                        marginLeft: '4px',
+                        zIndex: '10000',
+                        position: 'relative' ,
+                        pointerEvents: 'auto',
+                    });
+
+                // Prevent clicks from propagating
+                textInput.on('click mousedown focus', function (e) {
+                    e.stopPropagation();
+                });
+
+                // console.log(`Added note for ${username}`);
+                textInput.on('input', function () {
+                    const note = textInput.val();
+                    PLAYERNOTESMAP.set(username, note);
+                });
+
+                // Append text input to the grandparent element
+                grandparent.append(textInput);
+            }
+        }
+    });
+};
+
+const removePlayerNotes = () => {
+    // remove player aura
+     $('input.player-status-note').remove();
+}
+
+const handlePlayerNotes = () => {
+    if(LV_SETTINGS.PLAYER_NOTES){
+        addChatMsg(' 🍂 Adding player notes')
+        PLAYERNOTESMAP.clear();
+        addPlayerNotes()
+    }else{
+        removePlayerNotes()
+    }
+}
+
 const handleAutoReplay = () => {
   if (LV_SETTINGS.AUTO_REPLAY) {
     AUTO_REPLAY_INTERVAL = setInterval(() => {
@@ -247,6 +331,8 @@ const handleAutoReplay = () => {
     clearInterval(AUTO_REPLAY_INTERVAL)
   }
 }
+
+
 
 const saveSetting = () => {
   let settings = {
@@ -832,6 +918,7 @@ const messagesToCatch = {
     PLAYERS = data.players
     setTimeout(setPlayersLevel, 1000)
     setTimeout(handlePlayerAura, 20000)
+    setTimeout(handlePlayerNotes, 20000)
     
     setTimeout(() => {
       if (
@@ -873,6 +960,7 @@ const messagesToCatch = {
       PLAYERS = data.players
       setTimeout(setPlayersLevel, 1000)
       setTimeout(handlePlayerAura, 1000)
+      setTimeout(handlePlayerNotes, 1000)
     }
   },
   'game-reconnect-set-players': (data) => {
@@ -880,6 +968,7 @@ const messagesToCatch = {
     PLAYERS = Object.values(data)
     setTimeout(setPlayersLevel, 1000)
     setTimeout(handlePlayerAura, 1000)
+    setTimeout(handlePlayerNotes, 1000)
     if (PLAYER) {
       const tmp = PLAYERS.find((v) => v.username === PLAYER.username)
       if (tmp) {
@@ -1193,6 +1282,7 @@ const lvModalPerk = `
         <div class="lv-modal-option">
           <div class="lv-modal-checkbox player-notes lv-icon"></div>
           <span>Player Notes</span>
+          <button class="lv-modal-perk-refresh-notes">Refresh Notes</button>
         </div>
       </div>
       <div class="lv-modal-section">

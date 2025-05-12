@@ -155,6 +155,21 @@ $('.lv-modal-checkbox.chat-stats').on('click', () => {
     updateAllPlayerNotes()
   })
 
+  $('.lv-modal-perk-message-input').on('focus', function () {
+      // Disable all textareas
+      $('textarea').prop('disabled', true);
+  });
+
+  $('.lv-modal-perk-message-btn').on('click', () => {
+    const numToDel = parseInt($('.lv-modal-perk-message-input').val())
+    console.log(numToDel)
+    playerChatHiding(numToDel);
+  })
+  $('.lv-modal-perk-message-btn-undo').on('click', () => {
+    undoChatHiding();
+  })
+
+
   handleAutoReplay()
 }
 
@@ -180,6 +195,7 @@ function updateAllPlayerAura() {
 
 
 const addPlayerAura = () => {
+
     PLAYERS.forEach((player) => {
         // console.log(player.username)
         const str = `${parseInt(player.gridIdx) + 1} ${player.username}`
@@ -217,6 +233,12 @@ const addPlayerAura = () => {
 
         dropdown.on('change', function () {
             const selectedValue = dropdown.val();
+                let bgColor = 'white'; // default for "None"
+                if (selectedValue === 'good') bgColor = 'green';
+                else if (selectedValue === 'bad') bgColor = 'red';
+                else if (selectedValue === 'unk') bgColor = 'yellow';
+                console.log(`Setting background color to ${bgColor}`);
+                $(this).css('background-color', bgColor);
             PLAYERAURAMAP.set(username, selectedValue);
         });
         }
@@ -274,7 +296,7 @@ const addPlayerNotes = () => {
                     .addClass('player-status-note')
                     .css({
                         display: 'block',
-                        width: '40px',
+                        width: '60px',
                         height: '20px',
                         fontSize: '14px',
                         marginBottom: '2px',
@@ -326,6 +348,52 @@ const handlePlayerNotes = () => {
         removePlayerNotes()
     }
 }
+
+
+const playerChatHiding = (givenNumber) => {
+  const el = $('div:contains("Day ")');
+  const lastEl = el.last()[0];
+  let lastClass = '';
+
+  if (lastEl && lastEl.className) {
+    const classList = lastEl.className.trim().split(/\s+/);
+    lastClass = classList[classList.length - 1];
+    console.log("Last class from Day element:", lastClass);
+  }
+
+  if (lastClass) {
+    $('span.' + lastClass).each(function () {
+      const spanText = $(this).text().trim();
+      const firstWord = spanText.split(" ")[0];
+
+      if (/^\d/.test(firstWord) && firstWord !== givenNumber.toString()) {
+        const parentDiv = $(this).closest('div');
+        console.log("Hiding div because first word is a number not equal to 2:", parentDiv);
+        parentDiv.hide();
+      }
+    });
+  }
+};
+
+const undoChatHiding = () => {
+  const el = $('div:contains("Day ")');
+  const lastEl = el.last()[0];
+  let lastClass = '';
+
+  if (lastEl && lastEl.className) {
+    const classList = lastEl.className.trim().split(/\s+/);
+    lastClass = classList[classList.length - 1];
+    console.log("Last class from Day element:", lastClass);
+  }
+
+  if (lastClass) {
+    $('span.' + lastClass).each(function () {
+      const parentDiv = $(this).closest('div');
+      parentDiv.show(); // Show previously hidden parent
+    });
+  }
+};
+
 
 const handleAutoReplay = () => {
   if (LV_SETTINGS.AUTO_REPLAY) {
@@ -1298,8 +1366,10 @@ const lvModalPerk = `
       <div class="lv-modal-section">
         <div class="lv-modal-subtitle">Commands</div>
         <div class="lv-modal-command">
-          <button class="lv-modal-gold-wheel-btn">Message Sent By</button>
-          <span class="">See all messages sent by a player</span>
+        <span class="">See all messages sent by : </span>
+        <input type="text" class="lv-modal-perk-message-input">
+        <button class="lv-modal-perk-message-btn">Do</button>
+          <button class="lv-modal-perk-message-btn-undo">Undo</button>
         </div>
         <div class="lv-modal-command">
           <button class="lv-modal-gold-wheel-btn">Mentioned In</button>

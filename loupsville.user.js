@@ -1,10 +1,10 @@
+
 // ==UserScript==
-// @name         LoupsVille dev
+// @name         WovBot
 // @namespace    http://tampermonkey.net/
-// @version      1.5.0
+// @version      1.6.0
 // @description  wolvesville mod
-// @author       bladingpark
-// @contributor  sharpedge
+// @author       sharpedge
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=wolvesville.com
 // @match        *://*.wolvesville.com/*
 // @require      https://code.jquery.com/jquery-3.6.0.min.js
@@ -160,6 +160,10 @@ $('.lv-modal-checkbox.chat-stats').on('click', () => {
       $('textarea').prop('disabled', true);
   });
 
+    $('.lv-modal-perk-message-input').on('blur', function () {
+      $('textarea').prop('disabled', false);
+  });
+
   $('.lv-modal-perk-message-btn').on('click', () => {
     const numToDel = parseInt($('.lv-modal-perk-message-input').val())
     console.log(numToDel)
@@ -173,6 +177,11 @@ $('.lv-modal-checkbox.chat-stats').on('click', () => {
       // Disable all textareas
       $('textarea').prop('disabled', true);
   });
+
+  $('.lv-modal-perk-message-mention-input').on('blur', function () {
+      $('textarea').prop('disabled', false);
+  });
+
 
   $('.lv-modal-perk-message-mention-btn').on('click', () => {
     const numToDel = parseInt($('.lv-modal-perk-message-mention-input').val())
@@ -1397,7 +1406,7 @@ const lvModal = `
       </div>
       <div class="lv-modal-footer">
         Made with ❤️ by
-        <strong>&nbsp;Master Chief&nbsp;</strong>
+        <strong>&nbsp;SHARPEDGE&nbsp;</strong>
         (discord: masterchief_09)
       </div>
     </div>

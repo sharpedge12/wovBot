@@ -10,6 +10,7 @@
 // @require      https://code.jquery.com/jquery-3.6.0.min.js
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        none
 // @run-at       document-start
 // ==/UserScript==
 
@@ -167,7 +168,6 @@ $('.lv-modal-checkbox.chat-stats').on('click', () => {
 
   $('.lv-modal-perk-message-btn').on('click', () => {
     const numToDel = parseInt($('.lv-modal-perk-message-input').val())
-    console.log(numToDel)
     playerChatHiding(numToDel);
   })
   $('.lv-modal-perk-message-btn-undo').on('click', () => {
@@ -186,7 +186,6 @@ $('.lv-modal-checkbox.chat-stats').on('click', () => {
 
   $('.lv-modal-perk-message-mention-btn').on('click', () => {
     const numToDel = parseInt($('.lv-modal-perk-message-mention-input').val())
-    console.log(numToDel)
     playerChatHidingMention(numToDel);
   })
   $('.lv-modal-perk-message-mention-btn-undo').on('click', () => {
@@ -261,7 +260,6 @@ const addPlayerAura = () => {
                 if (selectedValue === 'good') bgColor = 'green';
                 else if (selectedValue === 'bad') bgColor = 'red';
                 else if (selectedValue === 'unk') bgColor = 'yellow';
-                console.log(`Setting background color to ${bgColor}`);
                 $(this).css('background-color', bgColor);
             PLAYERAURAMAP.set(username, selectedValue);
         });
@@ -299,7 +297,6 @@ const updatePlayerNotes = () => {
             if (textInput.length > 0 && PLAYERNOTESMAP.has(username)) {
                 const note = PLAYERNOTESMAP.get(username);
                 textInput.val(note);
-                console.log(`Updated note for ${username}: ${note}`);
             }
         }
     });
@@ -382,7 +379,6 @@ const playerChatHiding = (givenNumber) => {
   if (lastEl && lastEl.className) {
     const classList = lastEl.className.trim().split(/\s+/);
     lastClass = classList[classList.length - 1];
-    console.log("Last class from Day element:", lastClass);
   }
 
   if (lastClass) {
@@ -392,7 +388,6 @@ const playerChatHiding = (givenNumber) => {
 
       if (/^\d/.test(firstWord) && firstWord !== givenNumber.toString()) {
         const parentDiv = $(this).closest('div');
-        console.log("Hiding div because first word is a number not equal to 2:", parentDiv);
         parentDiv.hide();
       }
     });
@@ -407,7 +402,6 @@ const undoChatHiding = () => {
   if (lastEl && lastEl.className) {
     const classList = lastEl.className.trim().split(/\s+/);
     lastClass = classList[classList.length - 1];
-    console.log("Last class from Day element:", lastClass);
   }
 
   if (lastClass) {
@@ -426,7 +420,6 @@ const playerChatHidingMention = (givenNumber) => {
   if (lastEl && lastEl.className) {
     const classList = lastEl.className.trim().split(/\s+/);
     lastClass = classList[classList.length - 1];
-    console.log("Last class from Day element:", lastClass);
   }
 
   if (lastClass) {
@@ -443,11 +436,8 @@ const playerChatHidingMention = (givenNumber) => {
 
       // If number is NOT in the outsideSpanText, hide it
       if (!numberPattern.test(outsideSpanText)) {
-        console.log(`Hiding div — number ${givenNumber} not found outside span:`, parentDiv);
         parentDiv.hide();
-      } else {
-        console.log(`Keeping div — number ${givenNumber} found outside span.`);
-      }
+      } 
     });
   }
 };
@@ -460,7 +450,6 @@ const undoChatHidingMention = () => {
   if (lastEl && lastEl.className) {
     const classList = lastEl.className.trim().split(/\s+/);
     lastClass = classList[classList.length - 1];
-    console.log("Last class from Day element:", lastClass);
   }
 
   if (lastClass) {
@@ -497,30 +486,23 @@ const saveSetting = () => {
     SHOW_HIDDEN_LVL: LV_SETTINGS.SHOW_HIDDEN_LVL,
     AUTO_REPLAY: LV_SETTINGS.AUTO_REPLAY,
     AUTO_PLAY: LV_SETTINGS.AUTO_PLAY,
-    CHAT_STATS: LV_SETTINGS.CHAT_STATS,
-    PLAYER_NOTES: LV_SETTINGS.PLAYER_NOTES,
-    PLAYER_AURA: LV_SETTINGS.PLAYER_AURA,
-  };
-
-  GM_setValue('lv-settings', settings);
-  log("settings saved", settings);
-};
-
-
+  }
+  localStorage.setItem('lv-settings', JSON.stringify(settings))
+}
 
 const log = (m) => {
   if (LV_SETTINGS.DEBUG_MODE) console.log(m)
 }
 
 const loadSettings = () => {
-  const settings = GM_getValue('lv-settings', null);
+  const settings = localStorage.getItem('lv-settings')
   if (settings) {
-    LV_SETTINGS = settings; 
-    log("settings loaded", LV_SETTINGS);
+    LV_SETTINGS = JSON.parse(settings)
   } else {
-    saveSetting();
+    saveSetting()
   }
-};
+  log(LV_SETTINGS)
+}
 
 const delay = (time = 500) =>
   new Promise((r) => {
@@ -1174,7 +1156,7 @@ const messagesToCatch = {
     }
   },
   'game-night-started': () => {
-    const tmp = PLAYERS.find((v) => v.id === PLAYER.id)
+    const tmp = PLAYERS.find((v) => v?.id === PLAYER?.id)
     if (tmp && ROLE) DOCUMENT_TITLE = `🚀 ${tmp.gridIdx + 1}. ${ROLE.name}`
     setTimeout(setPlayersLevel, 1000)
   },

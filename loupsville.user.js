@@ -8,7 +8,8 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=wolvesville.com
 // @match        *://*.wolvesville.com/*
 // @require      https://code.jquery.com/jquery-3.6.0.min.js
-// @grant        none
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @run-at       document-start
 // ==/UserScript==
 
@@ -499,24 +500,27 @@ const saveSetting = () => {
     CHAT_STATS: LV_SETTINGS.CHAT_STATS,
     PLAYER_NOTES: LV_SETTINGS.PLAYER_NOTES,
     PLAYER_AURA: LV_SETTINGS.PLAYER_AURA,
-  }
-  localStorage.setItem('lv-settings', JSON.stringify(settings))
-  log("settings saved" , settings)
-}
+  };
+
+  GM_setValue('lv-settings', settings);
+  log("settings saved", settings);
+};
+
+
 
 const log = (m) => {
   if (LV_SETTINGS.DEBUG_MODE) console.log(m)
 }
 
 const loadSettings = () => {
-  const settings = localStorage.getItem('lv-settings')
+  const settings = GM_getValue('lv-settings', null);
   if (settings) {
-    LV_SETTINGS = JSON.parse(settings)
+    LV_SETTINGS = settings; 
+    log("settings loaded", LV_SETTINGS);
   } else {
-    saveSetting()
+    saveSetting();
   }
-  log(LV_SETTINGS)
-}
+};
 
 const delay = (time = 500) =>
   new Promise((r) => {

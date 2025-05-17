@@ -35,11 +35,11 @@ var DOCUMENT_TITLE = undefined
 var LV_SETTINGS = {
   DEBUG_MODE: false,
   SHOW_HIDDEN_LVL: true,
-  AUTO_REPLAY: false,
-  AUTO_PLAY: false,
-  CHAT_STATS: false,
-  PLAYER_NOTES: false,
-  PLAYER_AURA: false,
+  AUTO_REPLAY: true,
+  AUTO_PLAY: true,
+  CHAT_STATS: true,
+  PLAYER_NOTES: true,
+  PLAYER_AURA: true,
 }
 const PLAYERAURAMAP = new Map();
 const PLAYERNOTESMAP = new Map();
@@ -53,7 +53,7 @@ var GAME_SETTINGS = undefined
 const main = async () => {
   getAuthtokens()
   loadSettings()
-  patchLocalStorage()
+  // patchLocalStorage()
   injectChat()
   injectSettings()
   injectStyles()
@@ -473,7 +473,7 @@ const undoChatHidingMention = () => {
 
 
 const handleAutoReplay = () => {
-  if (LV_SETTINGS.AUTO_REPLAY) {
+  if (LV_SETTINGS.AUTO_REPLAY && GAME_SETTINGS && GAME_SETTINGS.gameMode === 'custom') {
     AUTO_REPLAY_INTERVAL = setInterval(() => {
       $('div:contains("START GAME")').click()
       $('div:contains("Play again")').click()

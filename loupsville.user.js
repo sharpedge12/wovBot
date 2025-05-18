@@ -72,7 +72,7 @@ const injectSettings = () => {
   $('.lv-modal-close').on('click', () => {
   $('.lv-modal-popup-container').css({ display: 'none' })
   })
-  $('.lv-perk-settings').css({ display: (LV_SETTINGS.CHAT_STATS ? 'block' : 'none') })
+  $('.lv-perk-settings').css({ display:'block' })
   $('.lv-modal-perk-close').on('click', () => {
     $('.lv-modal-perk-container').css({ display: 'none' })
   })
@@ -486,8 +486,12 @@ const saveSetting = () => {
     SHOW_HIDDEN_LVL: LV_SETTINGS.SHOW_HIDDEN_LVL,
     AUTO_REPLAY: LV_SETTINGS.AUTO_REPLAY,
     AUTO_PLAY: LV_SETTINGS.AUTO_PLAY,
+    CHAT_STATS: LV_SETTINGS.CHAT_STATS,
+    PLAYER_NOTES: LV_SETTINGS.PLAYER_NOTES,
+    PLAYER_AURA: LV_SETTINGS.PLAYER_AURA,
   }
   localStorage.setItem('lv-settings', JSON.stringify(settings))
+  log("settings saved" , settings)
 }
 
 const log = (m) => {
@@ -1517,7 +1521,7 @@ div {
   font-size: 18px;
   cursor: pointer;
   user-select: none !important;
-  display: none;
+  display: block;
 }
 .lv-chat-toggle {
   margin-right: 6px;

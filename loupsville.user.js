@@ -2,14 +2,12 @@
 // ==UserScript==
 // @name         WovBot
 // @namespace    http://tampermonkey.net/
-// @version      1.6.0
+// @version      1.7.0
 // @description  wolvesville mod
 // @author       sharpedge
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=wolvesville.com
 // @match        *://*.wolvesville.com/*
 // @require      https://code.jquery.com/jquery-3.6.0.min.js
-// @grant        GM_setValue
-// @grant        GM_getValue
 // @grant        none
 // @run-at       document-start
 // ==/UserScript==
@@ -72,7 +70,7 @@ const injectSettings = () => {
   $('.lv-modal-close').on('click', () => {
   $('.lv-modal-popup-container').css({ display: 'none' })
   })
-  $('.lv-perk-settings').css({ display:'block' })
+  $('.lv-perk-settings').css({ display:(LV_SETTINGS.CHAT_STATS ? 'block' : 'none') })
   $('.lv-modal-perk-close').on('click', () => {
     $('.lv-modal-perk-container').css({ display: 'none' })
   })
@@ -154,7 +152,7 @@ $('.lv-modal-checkbox.chat-stats').on('click', () => {
     updateAllPlayerAura()
   })
   $('.lv-modal-perk-refresh-notes').on('click', () => {
-    updateAllPlayerNotes()
+    updatePlayerNotes()
   })
 
   $('.lv-modal-perk-message-input').on('focus', function () {
@@ -463,14 +461,16 @@ const undoChatHidingMention = () => {
 
 
 const handleAutoReplay = () => {
-  if (LV_SETTINGS.AUTO_REPLAY && GAME_SETTINGS && GAME_SETTINGS.gameMode === 'custom') {
+  if (LV_SETTINGS.AUTO_REPLAY) {
     AUTO_REPLAY_INTERVAL = setInterval(() => {
-      $('div:contains("START GAME")').click()
-      $('div:contains("Play again")').click()
-      $('div:contains("Continue")').click()
-      if ($('div:contains("Play again")').length) {
-        $('div:contains("OK")').click()
-      }
+      if(GAME_SETTINGS?.gameMode === 'custom'){
+        $('div:contains("START GAME")').click()
+        $('div:contains("Play again")').click()
+        $('div:contains("Continue")').click()
+        if ($('div:contains("Play again")').length) {
+          $('div:contains("OK")').click()
+        }
+    }
     }, 500)
   } else {
     clearInterval(AUTO_REPLAY_INTERVAL)
@@ -491,7 +491,8 @@ const saveSetting = () => {
     PLAYER_AURA: LV_SETTINGS.PLAYER_AURA,
   }
   localStorage.setItem('lv-settings', JSON.stringify(settings))
-  log("settings saved" , settings)
+  log("settings saved" )
+  log(settings)
 }
 
 const log = (m) => {
@@ -1100,14 +1101,14 @@ const messagesToCatch = {
       if (
         !SOCKET &&
         LV_SETTINGS.AUTO_PLAY &&
-        GAME_SETTINGS.gameMode === 'custom' &&
+        GAME_SETTINGS?.gameMode === 'custom' &&
         GAME_SETTINGS.allCoupled &&
         GAME_ID &&
         SERVER_URL
       ) {
         connectSocket()
       }
-      if(!REGULARSOCKET && !(GAME_SETTINGS.gameMode === 'custom') && GAME_ID && SERVER_URL){
+      if(!REGULARSOCKET && !(GAME_SETTINGS?.gameMode === 'custom') && GAME_ID && SERVER_URL){
         connectRegularSocket()
       }
     }, 1000)
@@ -1119,14 +1120,14 @@ const messagesToCatch = {
       if (
         !SOCKET &&
         LV_SETTINGS.AUTO_PLAY &&
-        GAME_SETTINGS.gameMode === 'custom' &&
+        GAME_SETTINGS?.gameMode === 'custom' &&
         GAME_SETTINGS.allCoupled &&
         GAME_ID &&
         SERVER_URL
       ) {
         connectSocket()
       }
-      if(!REGULARSOCKET && !(GAME_SETTINGS.gameMode === 'custom') && GAME_ID && SERVER_URL){
+      if(!REGULARSOCKET && !(GAME_SETTINGS?.gameMode === 'custom') && GAME_ID && SERVER_URL){
         connectRegularSocket()
       }
     }, 1000)
